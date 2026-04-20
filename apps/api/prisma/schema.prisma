@@ -1,0 +1,311 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ───────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  REVIEWER
+  SPEAKER
+  ATTENDEE
+}
+
+enum DelegateCategory {
+  INTERNATIONAL
+  NATIONAL
+  SAARC
+  RESIDENT_MO_PARAMEDICS
+}
+
+enum PaymentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  QR_PAYMENT
+}
+
+enum AbstractStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  REVISION_REQUIRED
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+  SCHEDULED
+}
+
+enum PresentationType {
+  ORAL
+  POSTER
+  EPOSTER
+  EITHER
+}
+
+enum SessionType {
+  KEYNOTE
+  PANEL
+  WORKSHOP
+  ORAL_PRESENTATION
+  EPOSTER_SESSION
+  BREAK
+  NETWORKING
+}
+
+enum InvitationStatus {
+  PENDING
+  INVITED
+  CONFIRMED
+  DECLINED
+}
+
+enum InquiryType {
+  REGISTRATION
+  ABSTRACT
+  GENERAL
+}
+
+// ─── MODELS ──────────────────────────────────────────────────
+
+model User {
+  id              String         @id @default(cuid())
+  email           String         @unique
+  name            String
+  role            Role           @default(ATTENDEE)
+  passwordHash    String?
+  googleId        String?        @unique
+  phone           String?
+  country         String?
+  institution     String?
+  specialty       String?
+  designation     String?
+  isEmailVerified Boolean        @default(false)
+  deletedAt       DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  registrations    Registration[]
+  abstracts        Abstract[]
+  reviews          Review[]
+  refreshTokens    RefreshToken[]
+  savedSessions    SavedSession[]
+  verifiedPayments Payment[]      @relation("VerifiedBy")
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([tokenHash])
+}
+
+model Registration {
+  id                        String           @id @default(cuid())
+  userId                    String
+  user                      User             @relation(fields: [userId], references: [id])
+  registrationCode          String           @unique
+  category                  DelegateCategory
+  workshopSelected          Boolean          @default(false)
+  amount                    Decimal          @db.Decimal(10, 2)
+  currency                  String           @default("USD")
+  paymentStatus             PaymentStatus    @default(PENDING)
+  qrCodeData                String?
+  badgeUrl                  String?
+  certificateUrl            String?
+  invitationLetterUrl       String?
+  invitationLetterRequested Boolean          @default(false)
+  notes                     String?
+  deletedAt                 DateTime?
+  createdAt                 DateTime         @default(now())
+  updatedAt                 DateTime         @updatedAt
+
+  payments Payment[]
+
+  @@index([userId])
+  @@index([paymentStatus])
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  registrationId String
+  registration   Registration  @relation(fields: [registrationId], references: [id])
+  amount         Decimal       @db.Decimal(10, 2)
+  currency       String        @default("USD")
+  method         PaymentMethod
+  proofUrl       String?
+  status         PaymentStatus @default(PENDING)
+  verifiedAt     DateTime?
+  verifiedById   String?
+  verifiedBy     User?         @relation("VerifiedBy", fields: [verifiedById], references: [id])
+  adminNotes     String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([registrationId])
+  @@index([status])
+}
+
+model Abstract {
+  id               String           @id @default(cuid())
+  submitterId      String
+  submitter        User             @relation(fields: [submitterId], references: [id])
+  title            String
+  body             String
+  wordCount        Int
+  topic            String
+  presentationType PresentationType
+  status           AbstractStatus   @default(DRAFT)
+  fileUrl          String?
+  coAuthors        Json             // Array of { name, institution, email }
+  reviewerComments String?
+  finalScore       Float?
+  sessionId        String?
+  session          Session?         @relation(fields: [sessionId], references: [id])
+  reviews          Review[]
+  deletedAt        DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([submitterId])
+  @@index([status])
+}
+
+model Review {
+  id                  String   @id @default(cuid())
+  abstractId          String
+  abstract            Abstract @relation(fields: [abstractId], references: [id])
+  reviewerId          String
+  reviewer            User     @relation(fields: [reviewerId], references: [id])
+  originality         Int      // 1-5
+  scientificMerit     Int      // 1-5
+  clinicalRelevance   Int      // 1-5
+  presentationQuality Int      // 1-5
+  overallScore        Float    // Computed average
+  comments            String?
+  recommendation      String   // ACCEPT | REJECT | REVISE
+  createdAt           DateTime @default(now())
+
+  @@unique([abstractId, reviewerId])
+}
+
+model Speaker {
+  id               String           @id @default(cuid())
+  name             String
+  title            String
+  institution      String
+  country          String
+  bio              String
+  photoUrl         String?
+  email            String?
+  linkedInUrl      String?
+  invitationStatus InvitationStatus @default(PENDING)
+  updateToken      String?          @unique
+  isPublished      Boolean          @default(false)
+  sessions         Session[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model Session {
+  id          String         @id @default(cuid())
+  title       String
+  description String?
+  hall        String
+  day         Int
+  startTime   DateTime
+  endTime     DateTime
+  type        SessionType
+  isPublished Boolean        @default(false)
+  speakerId   String?
+  speaker     Speaker?       @relation(fields: [speakerId], references: [id])
+  abstracts   Abstract[]
+  savedBy     SavedSession[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([day, hall])
+}
+
+model SavedSession {
+  userId    String
+  sessionId String
+  user      User    @relation(fields: [userId], references: [id])
+  session   Session @relation(fields: [sessionId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@id([userId, sessionId])
+}
+
+model NewsPost {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String    @unique
+  excerpt       String
+  body          String
+  coverImageUrl String?
+  category      String
+  isPublished   Boolean   @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model EmailSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model ContactInquiry {
+  id          String      @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  inquiryType InquiryType
+  message     String
+  isResolved  Boolean     @default(false)
+  resolvedBy  String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String
+  entityType String
+  entityId   String
+  changes    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model ContentBlock {
+  id        String   @id @default(cuid())
+  section   String   @unique
+  data      Json
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
