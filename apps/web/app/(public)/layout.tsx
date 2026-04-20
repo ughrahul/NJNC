@@ -1,3 +1,6 @@
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+
 export default function PublicLayout({
   children,
 }: {
@@ -5,9 +8,9 @@ export default function PublicLayout({
 }) {
   return (
     <>
-      {/* Navbar will be added in Phase 10 */}
-      {children}
-      {/* Footer will be added in Phase 10 */}
+      <Navbar />
+      <main>{children}</main>
+      <Footer />
     </>
   );
 }

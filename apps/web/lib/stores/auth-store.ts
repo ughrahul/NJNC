@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { User } from '@njnc/types';
-import { api } from './api-client';
+import { api } from '../api-client';
 
 interface AuthState {
   user: User | null;
