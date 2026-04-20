@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
-import type { FastifyInstance } from 'fastify';
-import fp from 'fastify-plugin';
+import { PrismaClient } from "@prisma/client";
+import type { FastifyInstance } from "fastify";
+import fp from "fastify-plugin";
 
-declare module 'fastify' {
+declare module "fastify" {
   interface FastifyInstance {
     prisma: PrismaClient;
   }
@@ -11,20 +11,20 @@ declare module 'fastify' {
 async function prismaPlugin(fastify: FastifyInstance) {
   const prisma = new PrismaClient({
     log:
-      process.env.NODE_ENV === 'development'
-        ? ['query', 'info', 'warn', 'error']
-        : ['error'],
+      process.env.NODE_ENV === "development"
+        ? ["query", "info", "warn", "error"]
+        : ["error"],
   });
 
   await prisma.$connect();
-  fastify.log.info('✅ Database connected');
+  fastify.log.info("✅ Database connected");
 
-  fastify.decorate('prisma', prisma);
+  fastify.decorate("prisma", prisma);
 
-  fastify.addHook('onClose', async () => {
+  fastify.addHook("onClose", async () => {
     await prisma.$disconnect();
-    fastify.log.info('Database disconnected');
+    fastify.log.info("Database disconnected");
   });
 }
 
-export default fp(prismaPlugin, { name: 'prisma' });
+export default fp(prismaPlugin, { name: "prisma" });

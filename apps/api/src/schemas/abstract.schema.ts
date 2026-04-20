@@ -1,11 +1,7 @@
-import { z } from 'zod';
-import { ABSTRACT_CONSTRAINTS } from '@njnc/utils';
+import { z } from "zod";
+import { ABSTRACT_CONSTRAINTS } from "@njnc/utils";
 
-const presentationTypeEnum = z.enum(['ORAL', 'POSTER', 'EPOSTER', 'EITHER']);
-const abstractStatusEnum = z.enum([
-  'DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'REVISION_REQUIRED',
-  'ACCEPTED', 'REJECTED', 'WITHDRAWN', 'SCHEDULED',
-]);
+const presentationTypeEnum = z.enum(["ORAL", "POSTER", "EPOSTER", "EITHER"]);
 
 const coAuthorSchema = z.object({
   name: z.string().min(1),
@@ -15,17 +11,26 @@ const coAuthorSchema = z.object({
 
 // ─── Create/Update Abstract ─────────────────────────────────
 export const createAbstractSchema = z.object({
-  title: z.string().min(1).refine(
-    (val) => val.split(/\s+/).length <= ABSTRACT_CONSTRAINTS.titleMaxWords,
-    `Title must not exceed ${ABSTRACT_CONSTRAINTS.titleMaxWords} words`
-  ),
-  body: z.string().min(1).refine(
-    (val) => val.split(/\s+/).length <= ABSTRACT_CONSTRAINTS.bodyMaxWords,
-    `Body must not exceed ${ABSTRACT_CONSTRAINTS.bodyMaxWords} words`
-  ),
-  topic: z.string().min(1, 'Topic is required'),
+  title: z
+    .string()
+    .min(1)
+    .refine(
+      (val) => val.split(/\s+/).length <= ABSTRACT_CONSTRAINTS.titleMaxWords,
+      `Title must not exceed ${ABSTRACT_CONSTRAINTS.titleMaxWords} words`,
+    ),
+  body: z
+    .string()
+    .min(1)
+    .refine(
+      (val) => val.split(/\s+/).length <= ABSTRACT_CONSTRAINTS.bodyMaxWords,
+      `Body must not exceed ${ABSTRACT_CONSTRAINTS.bodyMaxWords} words`,
+    ),
+  topic: z.string().min(1, "Topic is required"),
   presentationType: presentationTypeEnum,
-  coAuthors: z.array(coAuthorSchema).max(ABSTRACT_CONSTRAINTS.maxCoAuthors).default([]),
+  coAuthors: z
+    .array(coAuthorSchema)
+    .max(ABSTRACT_CONSTRAINTS.maxCoAuthors)
+    .default([]),
   fileUrl: z.string().url().optional(),
 });
 export type CreateAbstractInput = z.infer<typeof createAbstractSchema>;
@@ -47,12 +52,12 @@ export const submitReviewSchema = z.object({
   clinicalRelevance: z.number().int().min(1).max(5),
   presentationQuality: z.number().int().min(1).max(5),
   comments: z.string().optional(),
-  recommendation: z.enum(['ACCEPT', 'REJECT', 'REVISE']),
+  recommendation: z.enum(["ACCEPT", "REJECT", "REVISE"]),
 });
 export type SubmitReviewInput = z.infer<typeof submitReviewSchema>;
 
 // ─── Admin Decision ─────────────────────────────────────────
 export const abstractDecisionSchema = z.object({
-  status: z.enum(['ACCEPTED', 'REJECTED', 'REVISION_REQUIRED']),
+  status: z.enum(["ACCEPTED", "REJECTED", "REVISION_REQUIRED"]),
   reviewerComments: z.string().optional(),
 });

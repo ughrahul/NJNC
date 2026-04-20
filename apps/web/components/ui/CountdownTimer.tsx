@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface TimeLeft {
   days: number;
@@ -25,7 +25,7 @@ function Digit({ value, label }: { value: number; label: string }) {
     <div className="flex flex-col items-center">
       <div className="relative bg-navy/80 backdrop-blur-sm rounded-xl px-4 py-3 sm:px-6 sm:py-4 min-w-[60px] sm:min-w-[80px] border border-white/10">
         <span className="font-display text-2xl sm:text-4xl lg:text-5xl font-bold text-white tabular-nums">
-          {String(value).padStart(2, '0')}
+          {String(value).padStart(2, "0")}
         </span>
         {/* Flip line */}
         <div className="absolute inset-x-0 top-1/2 h-px bg-white/10" />
@@ -52,7 +52,7 @@ export default function CountdownTimer({ targetDate }: { targetDate: Date }) {
   if (!mounted) {
     return (
       <div className="flex items-center gap-3 sm:gap-4">
-        {['Days', 'Hours', 'Minutes', 'Seconds'].map((label) => (
+        {["Days", "Hours", "Minutes", "Seconds"].map((label) => (
           <Digit key={label} value={0} label={label} />
         ))}
       </div>
@@ -62,11 +62,17 @@ export default function CountdownTimer({ targetDate }: { targetDate: Date }) {
   return (
     <div className="flex items-center gap-3 sm:gap-4">
       <Digit value={timeLeft.days} label="Days" />
-      <span className="text-2xl sm:text-4xl font-bold text-gold mt-[-1.5rem]">:</span>
+      <span className="text-2xl sm:text-4xl font-bold text-gold mt-[-1.5rem]">
+        :
+      </span>
       <Digit value={timeLeft.hours} label="Hours" />
-      <span className="text-2xl sm:text-4xl font-bold text-gold mt-[-1.5rem]">:</span>
+      <span className="text-2xl sm:text-4xl font-bold text-gold mt-[-1.5rem]">
+        :
+      </span>
       <Digit value={timeLeft.minutes} label="Minutes" />
-      <span className="text-2xl sm:text-4xl font-bold text-gold mt-[-1.5rem]">:</span>
+      <span className="text-2xl sm:text-4xl font-bold text-gold mt-[-1.5rem]">
+        :
+      </span>
       <Digit value={timeLeft.seconds} label="Seconds" />
     </div>
   );

@@ -1,7 +1,17 @@
-import type { FastifyInstance } from 'fastify';
-import type { CreateAbstractInput, SubmitReviewInput } from '../schemas/abstract.schema';
-import { NotFoundError, ForbiddenError, ValidationError } from '../utils/errors';
-import { countWords } from '@njnc/utils';
+import type { FastifyInstance } from "fastify";
+import type {
+  CreateAbstractInput,
+  SubmitReviewInput,
+} from "../schemas/abstract.schema";
+import {
+  NotFoundError,
+  ForbiddenError,
+  ValidationError,
+} from "../utils/errors";
+
+function countWords(str: string) {
+  return str.trim() ? str.trim().split(/\s+/).length : 0;
+}
 
 export class AbstractService {
   constructor(private app: FastifyInstance) {}
@@ -19,17 +29,26 @@ export class AbstractService {
         presentationType: input.presentationType,
         coAuthors: input.coAuthors,
         fileUrl: input.fileUrl,
-        status: 'DRAFT',
+        status: "DRAFT",
       },
     });
   }
 
-  async update(id: string, submitterId: string, input: Partial<CreateAbstractInput>) {
-    const abstract = await this.app.prisma.abstract.findUnique({ where: { id } });
-    if (!abstract || abstract.deletedAt) throw new NotFoundError('Abstract', id);
+  async update(
+    id: string,
+    submitterId: string,
+    input: Partial<CreateAbstractInput>,
+  ) {
+    const abstract = await this.app.prisma.abstract.findUnique({
+      where: { id },
+    });
+    if (!abstract || abstract.deletedAt)
+      throw new NotFoundError("Abstract", id);
     if (abstract.submitterId !== submitterId) throw new ForbiddenError();
-    if (!['DRAFT', 'REVISION_REQUIRED'].includes(abstract.status)) {
-      throw new ValidationError('Abstract can only be edited in DRAFT or REVISION_REQUIRED status');
+    if (!["DRAFT", "REVISION_REQUIRED"].includes(abstract.status)) {
+      throw new ValidationError(
+        "Abstract can only be edited in DRAFT or REVISION_REQUIRED status",
+      );
     }
 
     const wordCount = input.body ? countWords(input.body) : abstract.wordCount;
@@ -45,16 +64,21 @@ export class AbstractService {
   }
 
   async submit(id: string, submitterId: string) {
-    const abstract = await this.app.prisma.abstract.findUnique({ where: { id } });
-    if (!abstract || abstract.deletedAt) throw new NotFoundError('Abstract', id);
+    const abstract = await this.app.prisma.abstract.findUnique({
+      where: { id },
+    });
+    if (!abstract || abstract.deletedAt)
+      throw new NotFoundError("Abstract", id);
     if (abstract.submitterId !== submitterId) throw new ForbiddenError();
-    if (!['DRAFT', 'REVISION_REQUIRED'].includes(abstract.status)) {
-      throw new ValidationError('Abstract can only be submitted from DRAFT or REVISION_REQUIRED status');
+    if (!["DRAFT", "REVISION_REQUIRED"].includes(abstract.status)) {
+      throw new ValidationError(
+        "Abstract can only be submitted from DRAFT or REVISION_REQUIRED status",
+      );
     }
 
     return this.app.prisma.abstract.update({
       where: { id },
-      data: { status: 'SUBMITTED' },
+      data: { status: "SUBMITTED" },
     });
   }
 
@@ -62,23 +86,34 @@ export class AbstractService {
     const abstract = await this.app.prisma.abstract.findUnique({
       where: { id },
       include: {
-        submitter: { select: { id: true, email: true, name: true, institution: true } },
-        reviews: role === 'ADMIN' ? {
-          include: { reviewer: { select: { id: true, name: true } } },
-        } : false,
+        submitter: {
+          select: { id: true, email: true, name: true, institution: true },
+        },
+        reviews:
+          role === "ADMIN"
+            ? {
+                include: { reviewer: { select: { id: true, name: true } } },
+              }
+            : false,
         session: true,
       },
     });
 
-    if (!abstract || abstract.deletedAt) throw new NotFoundError('Abstract', id);
+    if (!abstract || abstract.deletedAt)
+      throw new NotFoundError("Abstract", id);
 
     // Reviewers should not see author info (double-blind)
-    if (role === 'REVIEWER') {
+    if (role === "REVIEWER") {
       return { ...abstract, submitter: undefined };
     }
 
     // Non-admin, non-reviewer can only see their own
-    if (userId && role !== 'ADMIN' && role !== 'REVIEWER' && abstract.submitterId !== userId) {
+    if (
+      userId &&
+      role !== "ADMIN" &&
+      role !== "REVIEWER" &&
+      abstract.submitterId !== userId
+    ) {
       throw new ForbiddenError();
     }
 
@@ -88,22 +123,30 @@ export class AbstractService {
   async getMyAbstracts(submitterId: string) {
     return this.app.prisma.abstract.findMany({
       where: { submitterId, deletedAt: null },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
-  async list(page: number, perPage: number, filters?: {
-    status?: string;
-    topic?: string;
-    search?: string;
-  }) {
+  async list(
+    page: number,
+    perPage: number,
+    filters?: {
+      status?: string;
+      topic?: string;
+      search?: string;
+    },
+  ) {
     const where: any = { deletedAt: null };
     if (filters?.status) where.status = filters.status;
     if (filters?.topic) where.topic = filters.topic;
     if (filters?.search) {
       where.OR = [
-        { title: { contains: filters.search, mode: 'insensitive' } },
-        { submitter: { name: { contains: filters.search, mode: 'insensitive' } } },
+        { title: { contains: filters.search, mode: "insensitive" } },
+        {
+          submitter: {
+            name: { contains: filters.search, mode: "insensitive" },
+          },
+        },
       ];
     }
 
@@ -112,9 +155,11 @@ export class AbstractService {
         where,
         include: {
           submitter: { select: { id: true, name: true, institution: true } },
-          reviews: { select: { id: true, overallScore: true, recommendation: true } },
+          reviews: {
+            select: { id: true, overallScore: true, recommendation: true },
+          },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip: (page - 1) * perPage,
         take: perPage,
       }),
@@ -125,24 +170,38 @@ export class AbstractService {
   }
 
   async assignReviewers(abstractId: string, reviewerIds: string[]) {
-    const abstract = await this.app.prisma.abstract.findUnique({ where: { id: abstractId } });
-    if (!abstract || abstract.deletedAt) throw new NotFoundError('Abstract', abstractId);
+    const abstract = await this.app.prisma.abstract.findUnique({
+      where: { id: abstractId },
+    });
+    if (!abstract || abstract.deletedAt)
+      throw new NotFoundError("Abstract", abstractId);
 
     await this.app.prisma.abstract.update({
       where: { id: abstractId },
-      data: { status: 'UNDER_REVIEW' },
+      data: { status: "UNDER_REVIEW" },
     });
 
     // Note: Reviews are created when reviewers submit — for now we track assignment via a notification
-    return { abstractId, reviewerIds, status: 'UNDER_REVIEW' };
+    return { abstractId, reviewerIds, status: "UNDER_REVIEW" };
   }
 
-  async submitReview(abstractId: string, reviewerId: string, input: SubmitReviewInput) {
-    const abstract = await this.app.prisma.abstract.findUnique({ where: { id: abstractId } });
-    if (!abstract || abstract.deletedAt) throw new NotFoundError('Abstract', abstractId);
+  async submitReview(
+    abstractId: string,
+    reviewerId: string,
+    input: SubmitReviewInput,
+  ) {
+    const abstract = await this.app.prisma.abstract.findUnique({
+      where: { id: abstractId },
+    });
+    if (!abstract || abstract.deletedAt)
+      throw new NotFoundError("Abstract", abstractId);
 
     const overallScore =
-      (input.originality + input.scientificMerit + input.clinicalRelevance + input.presentationQuality) / 4;
+      (input.originality +
+        input.scientificMerit +
+        input.clinicalRelevance +
+        input.presentationQuality) /
+      4;
 
     const review = await this.app.prisma.review.upsert({
       where: {
@@ -164,7 +223,9 @@ export class AbstractService {
     const allReviews = await this.app.prisma.review.findMany({
       where: { abstractId },
     });
-    const avgScore = allReviews.reduce((sum, r) => sum + r.overallScore, 0) / allReviews.length;
+    const avgScore =
+      allReviews.reduce((sum, r) => sum + r.overallScore, 0) /
+      allReviews.length;
 
     await this.app.prisma.abstract.update({
       where: { id: abstractId },
@@ -174,9 +235,16 @@ export class AbstractService {
     return review;
   }
 
-  async makeDecision(abstractId: string, status: string, reviewerComments?: string) {
-    const abstract = await this.app.prisma.abstract.findUnique({ where: { id: abstractId } });
-    if (!abstract || abstract.deletedAt) throw new NotFoundError('Abstract', abstractId);
+  async makeDecision(
+    abstractId: string,
+    status: string,
+    reviewerComments?: string,
+  ) {
+    const abstract = await this.app.prisma.abstract.findUnique({
+      where: { id: abstractId },
+    });
+    if (!abstract || abstract.deletedAt)
+      throw new NotFoundError("Abstract", abstractId);
 
     return this.app.prisma.abstract.update({
       where: { id: abstractId },
@@ -188,13 +256,16 @@ export class AbstractService {
   }
 
   async withdraw(id: string, submitterId: string) {
-    const abstract = await this.app.prisma.abstract.findUnique({ where: { id } });
-    if (!abstract || abstract.deletedAt) throw new NotFoundError('Abstract', id);
+    const abstract = await this.app.prisma.abstract.findUnique({
+      where: { id },
+    });
+    if (!abstract || abstract.deletedAt)
+      throw new NotFoundError("Abstract", id);
     if (abstract.submitterId !== submitterId) throw new ForbiddenError();
 
     return this.app.prisma.abstract.update({
       where: { id },
-      data: { status: 'WITHDRAWN' },
+      data: { status: "WITHDRAWN" },
     });
   }
 }

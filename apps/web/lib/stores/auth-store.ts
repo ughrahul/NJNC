@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import type { User } from '@njnc/types';
-import { api } from '../api-client';
+import { create } from "zustand";
+import type { User } from "@njnc/types";
+import { api } from "../api-client";
 
 interface AuthState {
   user: User | null;
@@ -36,8 +36,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (email: string, password: string) => {
     const result = await api.post<{ user: User; accessToken: string }>(
-      '/api/auth/login',
-      { email, password }
+      "/api/auth/login",
+      { email, password },
     );
     set({
       user: result.user,
@@ -48,8 +48,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   register: async (data: RegisterData) => {
     const result = await api.post<{ user: User; accessToken: string }>(
-      '/api/auth/register',
-      data
+      "/api/auth/register",
+      data,
     );
     set({
       user: result.user,
@@ -62,7 +62,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const token = get().accessToken;
       if (token) {
-        await api.post('/api/auth/logout', {}, token);
+        await api.post("/api/auth/logout", {}, token);
       }
     } catch {
       // Ignore errors on logout
@@ -77,8 +77,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshToken: async () => {
     try {
       const result = await api.post<{ user: User; accessToken: string }>(
-        '/api/auth/refresh',
-        {}
+        "/api/auth/refresh",
+        {},
       );
       set({
         user: result.user,

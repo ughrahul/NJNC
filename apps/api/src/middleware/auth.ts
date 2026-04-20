@@ -1,8 +1,8 @@
-import type { FastifyRequest, FastifyReply } from 'fastify';
-import type { JwtPayload } from '../plugins/jwt';
-import { UnauthorizedError } from '../utils/errors';
+import type { FastifyRequest, FastifyReply } from "fastify";
+import type { JwtPayload } from "../plugins/jwt";
+import { UnauthorizedError } from "../utils/errors";
 
-declare module 'fastify' {
+declare module "fastify" {
   interface FastifyRequest {
     user?: JwtPayload;
   }
@@ -14,10 +14,10 @@ declare module 'fastify' {
  */
 export async function extractUser(
   request: FastifyRequest,
-  _reply: FastifyReply
+  _reply: FastifyReply,
 ) {
   const authHeader = request.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return; // No token, continue without user
   }
 
@@ -47,9 +47,9 @@ export async function extractUser(
  */
 export async function requireAuth(
   request: FastifyRequest,
-  _reply: FastifyReply
+  _reply: FastifyReply,
 ) {
   if (!request.user) {
-    throw new UnauthorizedError('Authentication required');
+    throw new UnauthorizedError("Authentication required");
   }
 }

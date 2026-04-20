@@ -1,22 +1,26 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/hooks/use-auth';
-import { cn } from '@/lib/utils';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { cn } from "@/lib/utils";
 
 const adminNav = [
-  { href: '/admin', label: 'Dashboard', icon: '📊' },
-  { href: '/admin/registrations', label: 'Registrations', icon: '📝' },
-  { href: '/admin/abstracts', label: 'Abstracts', icon: '📄' },
-  { href: '/admin/program', label: 'Program', icon: '📅' },
-  { href: '/admin/speakers', label: 'Speakers', icon: '🎤' },
-  { href: '/admin/finance', label: 'Finance', icon: '💰' },
-  { href: '/admin/emails', label: 'Emails', icon: '📧' },
-  { href: '/admin/content', label: 'Content', icon: '✏️' },
+  { href: "/admin", label: "Dashboard", icon: "📊" },
+  { href: "/admin/registrations", label: "Registrations", icon: "📝" },
+  { href: "/admin/abstracts", label: "Abstracts", icon: "📄" },
+  { href: "/admin/program", label: "Program", icon: "📅" },
+  { href: "/admin/speakers", label: "Speakers", icon: "🎤" },
+  { href: "/admin/finance", label: "Finance", icon: "💰" },
+  { href: "/admin/emails", label: "Emails", icon: "📧" },
+  { href: "/admin/content", label: "Content", icon: "✏️" },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
@@ -35,10 +39,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors',
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors",
                 pathname === item.href
-                  ? 'bg-white/15 text-white font-medium'
-                  : 'text-white/70 hover:text-white hover:bg-white/10'
+                  ? "bg-white/15 text-white font-medium"
+                  : "text-white/70 hover:text-white hover:bg-white/10",
               )}
             >
               <span>{item.icon}</span>
@@ -62,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex-1 flex flex-col">
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8">
           <h1 className="text-lg font-semibold text-navy">
-            {adminNav.find((n) => n.href === pathname)?.label || 'Admin'}
+            {adminNav.find((n) => n.href === pathname)?.label || "Admin"}
           </h1>
           <Link href="/" className="text-sm text-primary hover:underline">
             ← Back to Site

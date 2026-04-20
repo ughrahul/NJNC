@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const createSessionSchema = z.object({
   title: z.string().min(1),
@@ -7,7 +7,15 @@ export const createSessionSchema = z.object({
   day: z.number().int().min(1).max(2),
   startTime: z.string().datetime(),
   endTime: z.string().datetime(),
-  type: z.enum(['KEYNOTE', 'PANEL', 'WORKSHOP', 'ORAL_PRESENTATION', 'EPOSTER_SESSION', 'BREAK', 'NETWORKING']),
+  type: z.enum([
+    "KEYNOTE",
+    "PANEL",
+    "WORKSHOP",
+    "ORAL_PRESENTATION",
+    "EPOSTER_SESSION",
+    "BREAK",
+    "NETWORKING",
+  ]),
   speakerId: z.string().optional(),
 });
 export type CreateSessionInput = z.infer<typeof createSessionSchema>;

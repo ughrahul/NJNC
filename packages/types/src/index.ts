@@ -1,6 +1,6 @@
 // ─── User ────────────────────────────────────────────────────
 
-export type Role = 'ADMIN' | 'REVIEWER' | 'SPEAKER' | 'ATTENDEE';
+export type Role = "ADMIN" | "REVIEWER" | "SPEAKER" | "ATTENDEE";
 
 export interface User {
   id: string;
@@ -20,19 +20,19 @@ export interface User {
 // ─── Registration ────────────────────────────────────────────
 
 export type DelegateCategory =
-  | 'INTERNATIONAL'
-  | 'NATIONAL'
-  | 'SAARC'
-  | 'RESIDENT_MO_PARAMEDICS';
+  | "INTERNATIONAL"
+  | "NATIONAL"
+  | "SAARC"
+  | "RESIDENT_MO_PARAMEDICS";
 
 export type PaymentStatus =
-  | 'PENDING'
-  | 'VERIFIED'
-  | 'REJECTED'
-  | 'REFUNDED'
-  | 'CANCELLED';
+  | "PENDING"
+  | "VERIFIED"
+  | "REJECTED"
+  | "REFUNDED"
+  | "CANCELLED";
 
-export type PaymentMethod = 'BANK_TRANSFER' | 'QR_PAYMENT';
+export type PaymentMethod = "BANK_TRANSFER" | "QR_PAYMENT";
 
 export interface Registration {
   id: string;
@@ -73,16 +73,16 @@ export interface Payment {
 // ─── Abstract ────────────────────────────────────────────────
 
 export type AbstractStatus =
-  | 'DRAFT'
-  | 'SUBMITTED'
-  | 'UNDER_REVIEW'
-  | 'REVISION_REQUIRED'
-  | 'ACCEPTED'
-  | 'REJECTED'
-  | 'WITHDRAWN'
-  | 'SCHEDULED';
+  | "DRAFT"
+  | "SUBMITTED"
+  | "UNDER_REVIEW"
+  | "REVISION_REQUIRED"
+  | "ACCEPTED"
+  | "REJECTED"
+  | "WITHDRAWN"
+  | "SCHEDULED";
 
-export type PresentationType = 'ORAL' | 'POSTER' | 'EPOSTER' | 'EITHER';
+export type PresentationType = "ORAL" | "POSTER" | "EPOSTER" | "EITHER";
 
 export interface CoAuthor {
   name: string;
@@ -110,7 +110,7 @@ export interface Abstract {
 
 // ─── Review ──────────────────────────────────────────────────
 
-export type ReviewRecommendation = 'ACCEPT' | 'REJECT' | 'REVISE';
+export type ReviewRecommendation = "ACCEPT" | "REJECT" | "REVISE";
 
 export interface Review {
   id: string;
@@ -128,7 +128,7 @@ export interface Review {
 
 // ─── Speaker ─────────────────────────────────────────────────
 
-export type InvitationStatus = 'PENDING' | 'INVITED' | 'CONFIRMED' | 'DECLINED';
+export type InvitationStatus = "PENDING" | "INVITED" | "CONFIRMED" | "DECLINED";
 
 export interface Speaker {
   id: string;
@@ -149,13 +149,13 @@ export interface Speaker {
 // ─── Session / Program ──────────────────────────────────────
 
 export type SessionType =
-  | 'KEYNOTE'
-  | 'PANEL'
-  | 'WORKSHOP'
-  | 'ORAL_PRESENTATION'
-  | 'EPOSTER_SESSION'
-  | 'BREAK'
-  | 'NETWORKING';
+  | "KEYNOTE"
+  | "PANEL"
+  | "WORKSHOP"
+  | "ORAL_PRESENTATION"
+  | "EPOSTER_SESSION"
+  | "BREAK"
+  | "NETWORKING";
 
 export interface Session {
   id: string;
@@ -190,7 +190,7 @@ export interface NewsPost {
 
 // ─── Contact Inquiry ─────────────────────────────────────────
 
-export type InquiryType = 'REGISTRATION' | 'ABSTRACT' | 'GENERAL';
+export type InquiryType = "REGISTRATION" | "ABSTRACT" | "GENERAL";
 
 export interface ContactInquiry {
   id: string;

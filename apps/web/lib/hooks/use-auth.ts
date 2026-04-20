@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useAuthStore } from '@/lib/stores/auth-store';
+import { useEffect } from "react";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
 /**
  * Hook for accessing auth state and actions.

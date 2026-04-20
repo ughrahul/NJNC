@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
-import type { FastifyInstance } from 'fastify';
-import fp from 'fastify-plugin';
+import jwt from "jsonwebtoken";
+import type { FastifyInstance } from "fastify";
+import fp from "fastify-plugin";
 
 export interface JwtPayload {
   userId: string;
@@ -8,7 +8,7 @@ export interface JwtPayload {
   role: string;
 }
 
-declare module 'fastify' {
+declare module "fastify" {
   interface FastifyInstance {
     jwt: {
       sign(payload: JwtPayload): string;
@@ -22,10 +22,10 @@ declare module 'fastify' {
 async function jwtPlugin(fastify: FastifyInstance) {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
-    throw new Error('JWT_SECRET environment variable is required');
+    throw new Error("JWT_SECRET environment variable is required");
   }
 
-  const accessExpiry = process.env.JWT_ACCESS_EXPIRY || '15m';
+  const accessExpiry = process.env.JWT_ACCESS_EXPIRY || "15m";
 
   const jwtHelper = {
     /**
@@ -33,9 +33,9 @@ async function jwtPlugin(fastify: FastifyInstance) {
      */
     sign(payload: JwtPayload): string {
       return jwt.sign(payload, secret, {
-        expiresIn: accessExpiry,
-        issuer: 'njnc2028-api',
-        audience: 'njnc2028-web',
+        expiresIn: accessExpiry as any,
+        issuer: "njnc2028-api",
+        audience: "njnc2028-web",
       });
     },
 
@@ -44,8 +44,8 @@ async function jwtPlugin(fastify: FastifyInstance) {
      */
     verify(token: string): JwtPayload {
       const decoded = jwt.verify(token, secret, {
-        issuer: 'njnc2028-api',
-        audience: 'njnc2028-web',
+        issuer: "njnc2028-api",
+        audience: "njnc2028-web",
       }) as JwtPayload & jwt.JwtPayload;
 
       return {
@@ -59,9 +59,9 @@ async function jwtPlugin(fastify: FastifyInstance) {
      * Sign a password reset token (1 hour expiry as per spec §12.4).
      */
     signPasswordReset(email: string): string {
-      return jwt.sign({ email, purpose: 'password-reset' }, secret, {
-        expiresIn: '1h',
-        issuer: 'njnc2028-api',
+      return jwt.sign({ email, purpose: "password-reset" }, secret, {
+        expiresIn: "1h",
+        issuer: "njnc2028-api",
       });
     },
 
@@ -70,18 +70,18 @@ async function jwtPlugin(fastify: FastifyInstance) {
      */
     verifyPasswordReset(token: string): { email: string } {
       const decoded = jwt.verify(token, secret, {
-        issuer: 'njnc2028-api',
+        issuer: "njnc2028-api",
       }) as { email: string; purpose: string };
 
-      if (decoded.purpose !== 'password-reset') {
-        throw new Error('Invalid token purpose');
+      if (decoded.purpose !== "password-reset") {
+        throw new Error("Invalid token purpose");
       }
 
       return { email: decoded.email };
     },
   };
 
-  fastify.decorate('jwt', jwtHelper);
+  fastify.decorate("jwt", jwtHelper);
 }
 
-export default fp(jwtPlugin, { name: 'jwt' });
+export default fp(jwtPlugin, { name: "jwt" });

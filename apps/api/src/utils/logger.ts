@@ -1,12 +1,16 @@
-import type { FastifyBaseLogger } from 'fastify';
+import type { FastifyBaseLogger } from "fastify";
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === "production";
 
 export const logger: FastifyBaseLogger | boolean | object = isProduction
   ? {
-      level: 'info',
+      level: "info",
       serializers: {
-        req(request: { method: string; url: string; headers: Record<string, string> }) {
+        req(request: {
+          method: string;
+          url: string;
+          headers: Record<string, string>;
+        }) {
           return {
             method: request.method,
             url: request.url,
@@ -20,8 +24,8 @@ export const logger: FastifyBaseLogger | boolean | object = isProduction
         },
       },
       // Never log sensitive data
-      redact: ['req.headers.authorization', 'req.headers.cookie'],
+      redact: ["req.headers.authorization", "req.headers.cookie"],
     }
   : {
-      level: 'debug',
+      level: "debug",
     };

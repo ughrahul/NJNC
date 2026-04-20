@@ -1,8 +1,22 @@
-import type { FastifyInstance } from 'fastify';
-import type { RegisterInput, LoginInput, ForgotPasswordInput, ResetPasswordInput } from '../schemas/auth.schema';
-import { hashPassword, verifyPassword, generateSecureToken, hashToken } from '../utils/crypto';
-import { ConflictError, UnauthorizedError, NotFoundError, ValidationError } from '../utils/errors';
-import type { JwtPayload } from '../plugins/jwt';
+import type { FastifyInstance } from "fastify";
+import type {
+  RegisterInput,
+  LoginInput,
+  ForgotPasswordInput,
+  ResetPasswordInput,
+} from "../schemas/auth.schema";
+import {
+  hashPassword,
+  verifyPassword,
+  generateSecureToken,
+  hashToken,
+} from "../utils/crypto";
+import {
+  ConflictError,
+  UnauthorizedError,
+  NotFoundError,
+  ValidationError,
+} from "../utils/errors";
 
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 const LOCKOUT_THRESHOLD = 5;
@@ -21,8 +35,8 @@ export class AuthService {
       where: { email: input.email },
     });
     if (existing) {
-      throw new ConflictError('Email address is already registered', {
-        email: 'This email is already in use',
+      throw new ConflictError("Email address is already registered", {
+        email: "This email is already in use",
       });
     }
 
@@ -61,13 +75,14 @@ export class AuthService {
    */
   async login(input: LoginInput) {
     // Check account lockout
-    const lockoutKey = `lockout:${input.email}`;
-    const failedAttempts = await this.app.redis.get(`failed-login:${input.email}`);
-    
+    const failedAttempts = await this.app.redis.get(
+      `failed-login:${input.email}`,
+    );
+
     if (failedAttempts && parseInt(failedAttempts) >= LOCKOUT_THRESHOLD) {
       const ttl = await this.app.redis.ttl(`failed-login:${input.email}`);
       throw new UnauthorizedError(
-        `Account locked due to too many failed attempts. Try again in ${Math.ceil(ttl / 60)} minutes.`
+        `Account locked due to too many failed attempts. Try again in ${Math.ceil(ttl / 60)} minutes.`,
       );
     }
 
@@ -86,19 +101,19 @@ export class AuthService {
 
     if (!user || user.deletedAt) {
       await this.incrementFailedLogin(input.email);
-      throw new UnauthorizedError('Invalid email or password');
+      throw new UnauthorizedError("Invalid email or password");
     }
 
     if (!user.passwordHash) {
       throw new UnauthorizedError(
-        'This account uses Google login. Please sign in with Google.'
+        "This account uses Google login. Please sign in with Google.",
       );
     }
 
     const isValid = await verifyPassword(input.password, user.passwordHash);
     if (!isValid) {
       await this.incrementFailedLogin(input.email);
-      throw new UnauthorizedError('Invalid email or password');
+      throw new UnauthorizedError("Invalid email or password");
     }
 
     // Clear failed login attempts on success
@@ -126,13 +141,19 @@ export class AuthService {
       where: { tokenHash },
       include: {
         user: {
-          select: { id: true, email: true, name: true, role: true, deletedAt: true },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            deletedAt: true,
+          },
         },
       },
     });
 
     if (!storedToken || storedToken.revokedAt || storedToken.user.deletedAt) {
-      throw new UnauthorizedError('Invalid or expired refresh token');
+      throw new UnauthorizedError("Invalid or expired refresh token");
     }
 
     if (storedToken.expiresAt < new Date()) {
@@ -141,7 +162,7 @@ export class AuthService {
         where: { id: storedToken.id },
         data: { revokedAt: new Date() },
       });
-      throw new UnauthorizedError('Refresh token has expired');
+      throw new UnauthorizedError("Refresh token has expired");
     }
 
     // Rotate: revoke old, create new
@@ -188,7 +209,7 @@ export class AuthService {
       return;
     }
 
-    const resetToken = this.app.jwt.signPasswordReset(user.email);
+    this.app.jwt.signPasswordReset(user.email);
 
     // TODO: Queue email job with reset link
     // await this.app.bull.add('email', {
@@ -197,7 +218,7 @@ export class AuthService {
     //   data: { resetToken, resetUrl: `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}` },
     // });
 
-    this.app.log.info({ email: user.email }, 'Password reset email queued');
+    this.app.log.info({ email: user.email }, "Password reset email queued");
   }
 
   /**
@@ -210,7 +231,7 @@ export class AuthService {
       const decoded = this.app.jwt.verifyPasswordReset(input.token);
       email = decoded.email;
     } catch {
-      throw new ValidationError('Invalid or expired reset token');
+      throw new ValidationError("Invalid or expired reset token");
     }
 
     const user = await this.app.prisma.user.findUnique({
@@ -219,7 +240,7 @@ export class AuthService {
     });
 
     if (!user || user.deletedAt) {
-      throw new NotFoundError('User');
+      throw new NotFoundError("User");
     }
 
     const passwordHash = await hashPassword(input.password);
@@ -260,7 +281,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundError('User', userId);
+      throw new NotFoundError("User", userId);
     }
 
     return user;

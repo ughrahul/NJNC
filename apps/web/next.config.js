@@ -1,29 +1,29 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  output: "standalone",
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'files.njnc2028.com',
+        protocol: "https",
+        hostname: "files.njnc2028.com",
       },
       {
-        protocol: 'https',
-        hostname: '*.r2.cloudflarestorage.com',
+        protocol: "https",
+        hostname: "*.r2.cloudflarestorage.com",
       },
     ],
   },
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
           },
         ],
       },

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // ─── Pagination ─────────────────────────────────────────────
 export const paginationSchema = z.object({
@@ -9,6 +9,6 @@ export type PaginationInput = z.infer<typeof paginationSchema>;
 
 // ─── ID Param ───────────────────────────────────────────────
 export const idParamSchema = z.object({
-  id: z.string().min(1, 'ID is required'),
+  id: z.string().min(1, "ID is required"),
 });
 export type IdParam = z.infer<typeof idParamSchema>;

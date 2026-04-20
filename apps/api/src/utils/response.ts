@@ -3,11 +3,15 @@
  * All responses follow the envelope defined in the spec (§10.2).
  */
 
-import type { ApiSuccessResponse, ApiErrorResponse, PaginationMeta } from '@njnc/types';
+import type {
+  ApiSuccessResponse,
+  ApiErrorResponse,
+  PaginationMeta,
+} from "@njnc/types";
 
 export function successResponse<T>(
   data: T,
-  meta?: PaginationMeta
+  meta?: PaginationMeta,
 ): ApiSuccessResponse<T> {
   const response: ApiSuccessResponse<T> = {
     success: true,
@@ -22,7 +26,7 @@ export function successResponse<T>(
 export function errorResponse(
   code: string,
   message: string,
-  fields?: Record<string, string>
+  fields?: Record<string, string>,
 ): ApiErrorResponse {
   return {
     success: false,
@@ -37,7 +41,7 @@ export function errorResponse(
 export function paginationMeta(
   page: number,
   perPage: number,
-  total: number
+  total: number,
 ): PaginationMeta {
   return {
     page,

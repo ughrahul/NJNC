@@ -1,7 +1,10 @@
-import type { FastifyInstance } from 'fastify';
-import type { CreateRegistrationInput, UpdateRegistrationInput } from '../schemas/registration.schema';
-import { generateRegistrationCode } from '@njnc/utils';
-import { NotFoundError, ConflictError, ForbiddenError } from '../utils/errors';
+import type { FastifyInstance } from "fastify";
+import type {
+  CreateRegistrationInput,
+  UpdateRegistrationInput,
+} from "../schemas/registration.schema";
+import { generateRegistrationCode } from "@njnc/utils";
+import { NotFoundError, ConflictError, ForbiddenError } from "../utils/errors";
 
 export class RegistrationService {
   constructor(private app: FastifyInstance) {}
@@ -16,11 +19,11 @@ export class RegistrationService {
       where: {
         userId,
         deletedAt: null,
-        paymentStatus: { notIn: ['CANCELLED'] },
+        paymentStatus: { notIn: ["CANCELLED"] },
       },
     });
     if (existing) {
-      throw new ConflictError('You already have an active registration');
+      throw new ConflictError("You already have an active registration");
     }
 
     // Get next registration number
@@ -46,7 +49,7 @@ export class RegistrationService {
         category: input.category,
         workshopSelected: input.workshopSelected,
         amount: 0, // No pricing per user clarification
-        currency: input.category === 'NATIONAL' ? 'NPR' : 'USD',
+        currency: input.category === "NATIONAL" ? "NPR" : "USD",
         notes: input.notes,
       },
       include: {
@@ -67,14 +70,21 @@ export class RegistrationService {
       where: { id },
       include: {
         user: {
-          select: { id: true, email: true, name: true, phone: true, country: true, institution: true },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            phone: true,
+            country: true,
+            institution: true,
+          },
         },
         payments: true,
       },
     });
 
     if (!registration || registration.deletedAt) {
-      throw new NotFoundError('Registration', id);
+      throw new NotFoundError("Registration", id);
     }
 
     // Non-admin users can only see their own registration
@@ -92,7 +102,7 @@ export class RegistrationService {
     const registration = await this.app.prisma.registration.findFirst({
       where: { userId, deletedAt: null },
       include: { payments: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
     return registration;
   }
@@ -100,11 +110,15 @@ export class RegistrationService {
   /**
    * List all registrations (admin).
    */
-  async list(page: number, perPage: number, filters?: {
-    status?: string;
-    category?: string;
-    search?: string;
-  }) {
+  async list(
+    page: number,
+    perPage: number,
+    filters?: {
+      status?: string;
+      category?: string;
+      search?: string;
+    },
+  ) {
     const where: any = { deletedAt: null };
 
     if (filters?.status) {
@@ -115,9 +129,9 @@ export class RegistrationService {
     }
     if (filters?.search) {
       where.OR = [
-        { registrationCode: { contains: filters.search, mode: 'insensitive' } },
-        { user: { name: { contains: filters.search, mode: 'insensitive' } } },
-        { user: { email: { contains: filters.search, mode: 'insensitive' } } },
+        { registrationCode: { contains: filters.search, mode: "insensitive" } },
+        { user: { name: { contains: filters.search, mode: "insensitive" } } },
+        { user: { email: { contains: filters.search, mode: "insensitive" } } },
       ];
     }
 
@@ -126,11 +140,19 @@ export class RegistrationService {
         where,
         include: {
           user: {
-            select: { id: true, email: true, name: true, country: true, institution: true },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              country: true,
+              institution: true,
+            },
           },
-          payments: { select: { id: true, status: true, method: true, createdAt: true } },
+          payments: {
+            select: { id: true, status: true, method: true, createdAt: true },
+          },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip: (page - 1) * perPage,
         take: perPage,
       }),
@@ -149,7 +171,7 @@ export class RegistrationService {
     });
 
     if (!registration || registration.deletedAt) {
-      throw new NotFoundError('Registration', id);
+      throw new NotFoundError("Registration", id);
     }
 
     return this.app.prisma.registration.update({
@@ -170,7 +192,7 @@ export class RegistrationService {
     });
 
     if (!registration || registration.deletedAt) {
-      throw new NotFoundError('Registration', id);
+      throw new NotFoundError("Registration", id);
     }
 
     return this.app.prisma.registration.update({
@@ -188,7 +210,7 @@ export class RegistrationService {
     });
 
     if (!registration || registration.deletedAt) {
-      throw new NotFoundError('Registration', registrationId);
+      throw new NotFoundError("Registration", registrationId);
     }
 
     if (registration.userId !== userId) {

@@ -1,5 +1,5 @@
-import bcrypt from 'bcrypt';
-import crypto from 'crypto';
+import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 const BCRYPT_COST_FACTOR = 12;
 
@@ -15,7 +15,7 @@ export async function hashPassword(password: string): Promise<string> {
  */
 export async function verifyPassword(
   password: string,
-  hash: string
+  hash: string,
 ): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
@@ -25,14 +25,14 @@ export async function verifyPassword(
  * Used for refresh tokens (64 bytes as per spec §12.1).
  */
 export function generateSecureToken(bytes = 64): string {
-  return crypto.randomBytes(bytes).toString('base64url');
+  return crypto.randomBytes(bytes).toString("base64url");
 }
 
 /**
  * Hash a token with SHA-256 for storage (refresh tokens stored hashed).
  */
 export function hashToken(token: string): string {
-  return crypto.createHash('sha256').update(token).digest('hex');
+  return crypto.createHash("sha256").update(token).digest("hex");
 }
 
 /**

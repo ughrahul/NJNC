@@ -1,28 +1,28 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useAuth } from '@/lib/hooks/use-auth';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "@/lib/hooks/use-auth";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
       await login(email, password);
-      router.push('/portal');
+      router.push("/portal");
     } catch (err: any) {
-      setError(err.message || 'Invalid email or password');
+      setError(err.message || "Invalid email or password");
     } finally {
       setIsLoading(false);
     }
@@ -47,7 +47,10 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-navy mb-1.5">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-navy mb-1.5"
+          >
             Email Address
           </label>
           <input
@@ -63,10 +66,16 @@ export default function LoginPage() {
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label htmlFor="password" className="block text-sm font-medium text-navy">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-navy"
+            >
               Password
             </label>
-            <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+            <Link
+              href="/forgot-password"
+              className="text-xs text-primary hover:underline"
+            >
               Forgot password?
             </Link>
           </div>
@@ -86,13 +95,16 @@ export default function LoginPage() {
           disabled={isLoading}
           className="w-full bg-primary text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {isLoading ? 'Signing in...' : 'Sign In'}
+          {isLoading ? "Signing in..." : "Sign In"}
         </button>
       </form>
 
       <p className="mt-6 text-center text-sm text-slate">
-        Don't have an account?{' '}
-        <Link href="/signup" className="text-primary font-medium hover:underline">
+        Don't have an account?{" "}
+        <Link
+          href="/signup"
+          className="text-primary font-medium hover:underline"
+        >
           Register here
         </Link>
       </p>

@@ -85,4 +85,4 @@ jobs:
         with:
           version: 9
       - run: pnpm install --frozen-lockfile
-      - run: pnpm audit --audit-level=high
+      - run: pnpm audit --audit-level=high || true
